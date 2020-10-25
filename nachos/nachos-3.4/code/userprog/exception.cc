@@ -206,8 +206,71 @@ ExceptionHandler(ExceptionType which)
 					machine->WriteRegister(2,0);
 					break;
 				}
+
+				case SC_Read:
+				{
+					// int Read(char *buffer, int charcount, OpenFileID id)
+					// Input: buffer: chua ket qua doc duoc, charcount: so ki tu, id: id cua File
+					// Output: So byte doc duoc, -1: loi, -2: cham den cuoi file
+
+					int bufferAddr = machine->ReadRegister(4);	// doc dia chi buffer
+					int charcount = machine->ReadRegister(5);	// doc so ki tu charcount
+					int fileId = machine->ReadRegister(6);		// doc id cua file
+
+					// id file khong hop le (0 <= fileId <= 10)
+					if (fileId < 0 || fileId >= 10) {
+						printf("\nInvalid file id.\n");
+						machine->WriteRegister(2, -1);
+						// Halt();
+						break;
+					}
+
+					// kiem tra su ton tai cua file
+					if (fileSystem->openfile[fileId] == NULL) {
+						printf("\nFile doesn't exist.\n");
+						machine->WriteRegister(2, -1);	// tra ve gia tri -1
+						// Halt();
+						break;
+					}
+
+					// truong hop doc tu stdout
+					if (fileSystem->openfile[fileId]->type == 3) {
+						printf("\nCan't read stdout.\n");
+						machine->WriteRegister(2, -1);
+						// Halt();
+						break;
+					}
+
+					char* result = User2System(bufferAddr, charcount); // chua ket qua doc duoc
+					int pos = fileSystem->openfile[fileId]->getPosition(); // vi tri con tro file hien tai
+
+					// truong hop doc tu stdin
+					if (fileSystem->openfile[fileId]->type == 2) {
+						int byteRead = gSynchConsole->Read(result, charcount); // doc thong tin tu stdin
+						System2User(bufferAddr, charcount, result);
+						machine->WriteRegister(2, byteRead);
+						delete result;
+						// Halt();
+						break;
+					}
+
+					// truong hop doc duoc file co noi dung
+					if (fileSystem->openfile[fileId]->Read(result, charcount) > 0) {
+						int newPos = fileSystem->openfile[fileId]->getPosition(); // vi tri con tro file moi
+						int byteRead = newPos - pos;
+						System2User(bufferAddr, byteRead, result);
+						machine->WriteRegister(2, byteRead);
+					}
+					else // truong hop doc file rong
+					{
+						machine->WriteRegister(2, -2);
+					}
+
+					delete result;
+					// Halt();
+					break;
+				}
 			}
-			break;
 
 		default:
 			printf("Unexpected user mode exception %d %d\n", which, type);
