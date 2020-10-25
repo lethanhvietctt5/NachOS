@@ -129,6 +129,7 @@ Yield:
 	syscall
 	j	$31
 	.end Yield
+	
 
 /* dummy function to keep gcc happy */
         .globl  __main

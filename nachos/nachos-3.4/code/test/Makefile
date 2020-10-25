@@ -27,7 +27,7 @@ CPPFLAGS = $(INCDIR)
 
 PATH = $(GCCDIR):/lib:/usr/bin:/bin
 
-CC = $(GCCDIR)gcc -B../../../gnu-decstation-ultrix/
+CC = $(GCCDIR)gcc -B../../../gnu-decstation-ultrix/ 
 AS = $(GCCDIR)as
 LD = $(GCCDIR)ld
 
@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort
+all: halt shell matmult sort closeFile
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -65,3 +65,9 @@ matmult.o: matmult.c
 matmult: matmult.o start.o
 	$(LD) $(LDFLAGS) start.o matmult.o -o matmult.coff
 	../bin/coff2noff matmult.coff matmult
+	
+closeFile.o: closeFile.c
+	$(CC) $(CFLAGS) -c closeFile.c
+closeFile: closeFile.o start.o
+	$(LD) $(LDFLAGS) start.o closeFile.o -o closeFile.coff
+	../bin/coff2noff closeFile.coff closeFile
