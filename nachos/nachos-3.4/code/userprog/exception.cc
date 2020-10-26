@@ -26,6 +26,7 @@
 #include "syscall.h"
 
 #define MaxFileLength 32
+#define MAX_LENGTH_INPUT 255
 //----------------------------------------------------------------------
 // ExceptionHandler
 // 	Entry point into the Nachos kernel.  Called when a user program
@@ -163,6 +164,10 @@ ExceptionHandler(ExceptionType which)
 					
 				case SC_Create:
 				{
+					// void Create(char *name);
+					// Input : ten cua file can tao
+					// Output: tra ve 0 neu thanh cong, -1 neu loi
+					
 					int virtAddr;
 					char* filename;
 					
@@ -197,11 +202,15 @@ ExceptionHandler(ExceptionType which)
 				}
 				case SC_Open:
 				{
+					// OpenFileId Open(char *name, int type);
+					// Input: [name: ten file], [type: 0 - readwrite, 1 - readonly, 2 - stdin, 3 - stdout]
+					// Output: tra ve ID cua file neu mo thanh cong, -1 neu loi
+					
 					int nameAddr = machine->ReadRegister(4);
 					int _type = machine->ReadRegister(5);
 					char* name;
 					
-					if (fileSystem->index >= 10)
+					if (fileSystem->index >= 10) // mo toi da 10 file cung luc (id: 0->9)
 					{
 						machine->WriteRegister(2, -1);
 						printf("\nCan not open more then 10 files.\n");
@@ -209,6 +218,8 @@ ExceptionHandler(ExceptionType which)
 					}
 					
 					name = User2System(nameAddr, MaxFileLength + 1);
+					
+					// mo file stdin va stdout thi khong can tang bien index
 					if (strcmp(name,"stdin") == 0)
 					{
 						machine->WriteRegister(2, 0);
@@ -228,7 +239,7 @@ ExceptionHandler(ExceptionType which)
 					fileSystem->openfile[temp_index] = fileSystem->Open(name, _type);
 					if (fileSystem->openfile[temp_index] != NULL)
 					{
-						machine->WriteRegister(2, temp_index);
+						machine->WriteRegister(2, temp_index); // tra ve id cua file duoc mo thanh cong
 						printf("\nOpen successful.\n");
 					}
 					else
@@ -241,6 +252,9 @@ ExceptionHandler(ExceptionType which)
 					
 				case SC_Close:
 				{
+					// void Close(OpenFileId id);
+					// Input: id file can dong
+					// Output: tra ve 0 neu dong thanh cong, -1 neu xay ra loi
 					int indexClose = machine->ReadRegister(4);
 					int indexCrr = fileSystem->index;
 					
@@ -460,8 +474,47 @@ ExceptionHandler(ExceptionType which)
 						return;
 						break;
 					}
-					
+				}
 				
+				case SC_ReadString:
+				{
+					// void ReadString(char* buffer, int length);
+					// buffer: mang luu chuoi
+					// length: do dai cua chuoi
+					
+					char* buffer = new char[MAX_LENGTH_INPUT];
+					if (buffer == 0)
+					{
+						printf("\nNot enough memory.\n");
+						delete[] buffer;
+						break;
+					}
+					int virtAddr = machine->ReadRegister(4);
+					int length = machine->ReadRegister(5);
+					
+					int size = gSynchConsole->Read(buffer, length);	// kich thuoc cua choi da nhap
+					System2User(virtAddr, size, buffer);	// luu chuoi da nhap vao buffer
+					delete[] buffer;
+					break;
+				}
+				
+				case SC_PrintString:
+				{
+					// void PrintString(char* buffer);
+					// buffer: chuoi can in ra
+					int virtAddr = machine->ReadRegister(4);
+					int i = 0;
+					char* buffer = new char[MAX_LENGTH_INPUT];
+					buffer = User2System(virtAddr, MAX_LENGTH_INPUT); // doc chuoi da nhap
+					while (buffer[i] != 0 && buffer[i] != '\n')
+					{
+						gSynchConsole->Write(buffer + i, 1);	// in ra tung ky tu
+						i++;
+					}
+					buffer[i] = '\n';
+					gSynchConsole->Write(buffer + i, 1);	// in ky tu xuong dong
+					delete[] buffer;
+					break;
 				}
 				default:
 					break;

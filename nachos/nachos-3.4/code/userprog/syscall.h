@@ -29,8 +29,9 @@
 #define SC_Close	8
 #define SC_Fork		9
 #define SC_Yield	10
-
 #define SC_Seek     11
+#define SC_ReadString		12
+#define SC_PrintString	13
 
 #ifndef IN_ASM
 
@@ -127,6 +128,12 @@ void Fork(void (*func)());
 void Yield();		
 
 int Seek(int pos, OpenFileId id);
+
+/* Read a line from console */
+void ReadString(char* buffer, int length);
+
+/* Print a line which was typed to console */
+void PrintString(char* buffer);
 
 #endif /* IN_ASM */
 
