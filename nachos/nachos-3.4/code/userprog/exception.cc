@@ -93,6 +93,14 @@ int System2User(int virtAddr, int length, char* buffer)
 	
 	return index;
 }
+void IncreasePC()
+{
+	int counter = machine->ReadRegister(PCReg);
+   	machine->WriteRegister(PrevPCReg, counter);
+    	counter = machine->ReadRegister(NextPCReg);
+    	machine->WriteRegister(PCReg, counter);
+   	machine->WriteRegister(NextPCReg, counter + 4);
+}
 
 void
 ExceptionHandler(ExceptionType which)
@@ -103,6 +111,47 @@ ExceptionHandler(ExceptionType which)
 	{
 		case NoException:
 			return;
+		case PageFaultException:
+		DEBUG('a', "\n No valid translation found");
+		printf("\n\n No valid translation found");
+		interrupt->Halt();
+		break;
+
+		case ReadOnlyException:
+			DEBUG('a', "\n Write attempted to page marked read-only");
+			printf("\n\n Write attempted to page marked read-only");
+			interrupt->Halt();
+			break;
+
+		case BusErrorException:
+			DEBUG('a', "\n Translation resulted invalid physical address");
+			printf("\n\n Translation resulted invalid physical address");
+			interrupt->Halt();
+			break;
+
+		case AddressErrorException:
+			DEBUG('a', "\n Unaligned reference or one that was beyond the end of the address space");
+			printf("\n\n Unaligned reference or one that was beyond the end of the address space");
+			interrupt->Halt();
+			break;
+
+		case OverflowException:
+			DEBUG('a', "\nInteger overflow in add or sub.");
+			printf("\n\n Integer overflow in add or sub.");
+			interrupt->Halt();
+			break;
+
+		case IllegalInstrException:
+			DEBUG('a', "\n Unimplemented or reserved instr.");
+			printf("\n\n Unimplemented or reserved instr.");
+			interrupt->Halt();
+			break;
+
+		case NumExceptionTypes:
+			DEBUG('a', "\n Number exception types");
+			printf("\n\n Number exception types");
+			interrupt->Halt();
+			break;
 
 		case SyscallException:
 			switch(type)
@@ -221,7 +270,8 @@ ExceptionHandler(ExceptionType which)
 					if (fileId < 0 || fileId >= 10) {
 						printf("\nInvalid file id.\n");
 						machine->WriteRegister(2, -1);
-						// Halt();
+						IncreasePC();
+						return;
 						break;
 					}
 
@@ -230,6 +280,8 @@ ExceptionHandler(ExceptionType which)
 						printf("\nFile doesn't exist.\n");
 						machine->WriteRegister(2, -1);
 						// Halt();
+						IncreasePC();
+						return;
 						break;
 					}
 
@@ -238,6 +290,8 @@ ExceptionHandler(ExceptionType which)
 						printf("\nCan't read stdout.\n");
 						machine->WriteRegister(2, -1);
 						// Halt();
+						IncreasePC();
+						return;
 						break;
 					}
 
@@ -249,8 +303,10 @@ ExceptionHandler(ExceptionType which)
 						System2User(bufferAddr, charcount, result);
 						machine->WriteRegister(2, byteRead);
 						delete result;
+						IncreasePC();
+						return;
 						// Halt();
-						break;
+						
 					}
 
 					int pos = fileSystem->openfile[fileId]->getPosition(); // vi tri con tro file hien tai
@@ -268,8 +324,10 @@ ExceptionHandler(ExceptionType which)
 					}
 
 					delete result;
+					IncreasePC();
+					return;
 					// Halt();
-					break;
+					
 				}
 
 				case SC_Write:
@@ -287,6 +345,8 @@ ExceptionHandler(ExceptionType which)
 						printf("\nInvalid file id.\n");
 						machine->WriteRegister(2, -1);
 						// Halt();
+						IncreasePC();
+						return;
 						break;
 					}
 
@@ -294,6 +354,8 @@ ExceptionHandler(ExceptionType which)
 					if (fileSystem->openfile[fileId] == NULL) {
 						printf("\nFile doesn't exist.\n");
 						machine->WriteRegister(2, -1);
+						IncreasePC();
+						return;
 						// Halt();
 						break;
 					}
@@ -302,6 +364,8 @@ ExceptionHandler(ExceptionType which)
 					if (fileSystem->openfile[fileId]->type == 2 || fileSystem->openfile[fileId]->type == 1) {
 						printf("\nCan't write to stdin or Read-only.\n");
 						machine->WriteRegister(2, -1);
+						IncreasePC();
+						return;
 						// Halt();
 						break;
 					}
@@ -318,6 +382,8 @@ ExceptionHandler(ExceptionType which)
 						gSynchConsole->Write(buffer, i + 1);
 						machine->WriteRegister(2, i); // tra ve so byte thuc su ghi
 						delete buffer;
+						IncreasePC();
+						return;
 						// Halt();
 						break;
 					}
@@ -330,7 +396,8 @@ ExceptionHandler(ExceptionType which)
 						int newPos = fileSystem->openfile[fileId]->getPosition(); // vi tri con tro file sau khi ghi
 						machine->WriteRegister(2, newPos - pos); // tra ve so byte thuc su ghi
 						delete buffer;
-						// Halt();
+						IncreasePC();
+						return;
 						break;
 					}
 				}
@@ -348,6 +415,8 @@ ExceptionHandler(ExceptionType which)
 					if (fileId < 0 || fileId >= 10) {
 						printf("\nInvalid file id.\n");
 						machine->WriteRegister(2, -1);
+						IncreasePC();
+						return;
 						// Halt();
 						break;
 					}
@@ -356,6 +425,8 @@ ExceptionHandler(ExceptionType which)
 					if (fileSystem->openfile[fileId] == NULL) {
 						printf("\nFile doesn't exist.\n");
 						machine->WriteRegister(2, -1);
+						IncreasePC();
+						return;
 						// Halt();
 						break;
 					}
@@ -364,6 +435,8 @@ ExceptionHandler(ExceptionType which)
 					if (fileSystem->openfile[fileId]->type == 2 || fileSystem->openfile[fileId]->type == 3) {
 						printf("\nCan't seek on stdin or stdout.\n");
 						machine->WriteRegister(2, -1);
+						IncreasePC();
+						return;
 						// Halt();
 						break;
 					}
@@ -374,6 +447,8 @@ ExceptionHandler(ExceptionType which)
 					if (pos < 0 || pos > fileSystem->openfile[fileId]->Length()) {
 						printf("\nCan't seek to this position.\n");
 						machine->WriteRegister(2, -1);
+						IncreasePC();
+						return;
 						// Halt();
 						break;
 					} else {
@@ -381,14 +456,18 @@ ExceptionHandler(ExceptionType which)
 						fileSystem->openfile[fileId]->Seek(pos);
 						machine->WriteRegister(2, pos);
 						// Halt();
+						IncreasePC();
+						return;
 						break;
 					}
+					
+				
 				}
+				default:
+					break;
 			}
 
-		default:
-			printf("Unexpected user mode exception %d %d\n", which, type);
-			interrupt->Halt();
-			break;	
+			IncreasePC();	
+	
 	}
 }
