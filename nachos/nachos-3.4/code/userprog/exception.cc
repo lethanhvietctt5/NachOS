@@ -217,7 +217,7 @@ ExceptionHandler(ExceptionType which)
 					int charcount = machine->ReadRegister(5);	// doc so ki tu charcount
 					int fileId = machine->ReadRegister(6);		// doc id cua file
 
-					// id file khong hop le (0 <= fileId <= 10)
+					// id file khong hop le (0 <= fileId < 10)
 					if (fileId < 0 || fileId >= 10) {
 						printf("\nInvalid file id.\n");
 						machine->WriteRegister(2, -1);
@@ -228,7 +228,7 @@ ExceptionHandler(ExceptionType which)
 					// kiem tra su ton tai cua file
 					if (fileSystem->openfile[fileId] == NULL) {
 						printf("\nFile doesn't exist.\n");
-						machine->WriteRegister(2, -1);	// tra ve gia tri -1
+						machine->WriteRegister(2, -1);
 						// Halt();
 						break;
 					}
@@ -242,7 +242,6 @@ ExceptionHandler(ExceptionType which)
 					}
 
 					char* result = User2System(bufferAddr, charcount); // chua ket qua doc duoc
-					int pos = fileSystem->openfile[fileId]->getPosition(); // vi tri con tro file hien tai
 
 					// truong hop doc tu stdin
 					if (fileSystem->openfile[fileId]->type == 2) {
@@ -253,6 +252,8 @@ ExceptionHandler(ExceptionType which)
 						// Halt();
 						break;
 					}
+
+					int pos = fileSystem->openfile[fileId]->getPosition(); // vi tri con tro file hien tai
 
 					// truong hop doc duoc file co noi dung
 					if (fileSystem->openfile[fileId]->Read(result, charcount) > 0) {
@@ -269,6 +270,119 @@ ExceptionHandler(ExceptionType which)
 					delete result;
 					// Halt();
 					break;
+				}
+
+				case SC_Write:
+				{
+					// int Write(char* buffer, int charcount, OpenFileID id)
+					// Input : char* buffer, charcount: so ki tu, id: id cua file
+					// Output: So byte ghi duoc, -1: loi, -2: den cuoi file
+
+					int bufferAddr = machine->ReadRegister(4);	// doc dia chi buffer
+					int charcount = machine->ReadRegister(5);	// doc so ki tu charcount
+					int fileId = machine->ReadRegister(6);		// doc id cua file
+
+					// id file khong hop le (0 <= fileId < 10)
+					if (fileId < 0 || fileId >= 10) {
+						printf("\nInvalid file id.\n");
+						machine->WriteRegister(2, -1);
+						// Halt();
+						break;
+					}
+
+					// kiem tra su ton tai cua file
+					if (fileSystem->openfile[fileId] == NULL) {
+						printf("\nFile doesn't exist.\n");
+						machine->WriteRegister(2, -1);
+						// Halt();
+						break;
+					}
+
+					// truong hop ghi ra stdin hoac file Read-only 
+					if (fileSystem->openfile[fileId]->type == 2 || fileSystem->openfile[fileId]->type == 1) {
+						printf("\nCan't write to stdin or Read-only.\n");
+						machine->WriteRegister(2, -1);
+						// Halt();
+						break;
+					}
+
+					char* buffer = User2System(bufferAddr, charcount);
+
+					// truong hop ghi ra stdout
+					if (fileSystem->openfile[fileId]->type == 3) {
+						int i = 0;
+						while (i <= charcount && buffer[i] != '\n' && buffer[i] != 0) {
+							i++;
+						}
+						buffer[i] = '\n';
+						gSynchConsole->Write(buffer, i + 1);
+						machine->WriteRegister(2, i); // tra ve so byte thuc su ghi
+						delete buffer;
+						// Halt();
+						break;
+					}
+
+					// truong hop ghi ra file Read-write
+					if (fileSystem->openfile[fileId]->type == 0) {
+						int pos = fileSystem->openfile[fileId]->getPosition(); // vi tri con tro file hien tai
+						// ghi ra file
+						fileSystem->openfile[fileId]->Write(buffer, charcount);
+						int newPos = fileSystem->openfile[fileId]->getPosition(); // vi tri con tro file sau khi ghi
+						machine->WriteRegister(2, newPos - pos); // tra ve so byte thuc su ghi
+						delete buffer;
+						// Halt();
+						break;
+					}
+				}
+
+				case SC_Seek:
+				{
+					// int Seek(int pos, OpenFileID id)
+					// Input: pos: vi tri can chi chuyen con tro toi (-1 neu den cuoi file), id: id: id file
+					// Output: tra ve vi tri thuc su cua con tro, -1: loi
+
+					int pos = machine->ReadRegister(4);		// doc vi tri
+					int fileId = machine->ReadRegister(5);	// doc id file
+
+					// id file khong hop le (0 <= fileId < 10)
+					if (fileId < 0 || fileId >= 10) {
+						printf("\nInvalid file id.\n");
+						machine->WriteRegister(2, -1);
+						// Halt();
+						break;
+					}
+
+					// kiem tra su ton tai cua file
+					if (fileSystem->openfile[fileId] == NULL) {
+						printf("\nFile doesn't exist.\n");
+						machine->WriteRegister(2, -1);
+						// Halt();
+						break;
+					}
+
+					// kiem tra file co phai la stdin, stdout hay khong
+					if (fileSystem->openfile[fileId]->type == 2 || fileSystem->openfile[fileId]->type == 3) {
+						printf("\nCan't seek on stdin or stdout.\n");
+						machine->WriteRegister(2, -1);
+						// Halt();
+						break;
+					}
+					// neu pos = -1 thi pos = chieu dai cua file
+					pos = (pos == -1) ? fileSystem->openfile[fileId]->Length() : pos; 
+
+					// kiem tra tinh hop le cua vi tri pos (0 <= pos <= length)
+					if (pos < 0 || pos > fileSystem->openfile[fileId]->Length()) {
+						printf("\nCan't seek to this position.\n");
+						machine->WriteRegister(2, -1);
+						// Halt();
+						break;
+					} else {
+						// neu vi tri pos hop le thi chuyen con tro den va tra ve gia tri pos
+						fileSystem->openfile[fileId]->Seek(pos);
+						machine->WriteRegister(2, pos);
+						// Halt();
+						break;
+					}
 				}
 			}
 
