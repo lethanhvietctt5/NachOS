@@ -272,27 +272,22 @@ ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2, -1);
 						IncreasePC();
 						return;
-						break;
 					}
 
 					// kiem tra su ton tai cua file
 					if (fileSystem->openfile[fileId] == NULL) {
 						printf("\nFile doesn't exist.\n");
 						machine->WriteRegister(2, -1);
-						// Halt();
 						IncreasePC();
 						return;
-						break;
 					}
 
 					// truong hop doc tu stdout
 					if (fileSystem->openfile[fileId]->type == 3) {
 						printf("\nCan't read stdout.\n");
 						machine->WriteRegister(2, -1);
-						// Halt();
 						IncreasePC();
 						return;
-						break;
 					}
 
 					char* result = User2System(bufferAddr, charcount); // chua ket qua doc duoc
@@ -305,7 +300,6 @@ ExceptionHandler(ExceptionType which)
 						delete result;
 						IncreasePC();
 						return;
-						// Halt();
 						
 					}
 
@@ -326,7 +320,6 @@ ExceptionHandler(ExceptionType which)
 					delete result;
 					IncreasePC();
 					return;
-					// Halt();
 					
 				}
 
@@ -344,10 +337,8 @@ ExceptionHandler(ExceptionType which)
 					if (fileId < 0 || fileId >= 10) {
 						printf("\nInvalid file id.\n");
 						machine->WriteRegister(2, -1);
-						// Halt();
 						IncreasePC();
 						return;
-						break;
 					}
 
 					// kiem tra su ton tai cua file
@@ -356,8 +347,6 @@ ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2, -1);
 						IncreasePC();
 						return;
-						// Halt();
-						break;
 					}
 
 					// truong hop ghi ra stdin hoac file Read-only 
@@ -366,8 +355,6 @@ ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2, -1);
 						IncreasePC();
 						return;
-						// Halt();
-						break;
 					}
 
 					char* buffer = User2System(bufferAddr, charcount);
@@ -384,8 +371,6 @@ ExceptionHandler(ExceptionType which)
 						delete buffer;
 						IncreasePC();
 						return;
-						// Halt();
-						break;
 					}
 
 					// truong hop ghi ra file Read-write
@@ -398,7 +383,6 @@ ExceptionHandler(ExceptionType which)
 						delete buffer;
 						IncreasePC();
 						return;
-						break;
 					}
 				}
 
@@ -417,8 +401,6 @@ ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2, -1);
 						IncreasePC();
 						return;
-						// Halt();
-						break;
 					}
 
 					// kiem tra su ton tai cua file
@@ -427,8 +409,6 @@ ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2, -1);
 						IncreasePC();
 						return;
-						// Halt();
-						break;
 					}
 
 					// kiem tra file co phai la stdin, stdout hay khong
@@ -437,8 +417,6 @@ ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2, -1);
 						IncreasePC();
 						return;
-						// Halt();
-						break;
 					}
 					// neu pos = -1 thi pos = chieu dai cua file
 					pos = (pos == -1) ? fileSystem->openfile[fileId]->Length() : pos; 
@@ -449,8 +427,6 @@ ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2, -1);
 						IncreasePC();
 						return;
-						// Halt();
-						break;
 					} else {
 						// neu vi tri pos hop le thi chuyen con tro den va tra ve gia tri pos
 						fileSystem->openfile[fileId]->Seek(pos);
@@ -458,7 +434,6 @@ ExceptionHandler(ExceptionType which)
 						// Halt();
 						IncreasePC();
 						return;
-						break;
 					}
 					
 				
