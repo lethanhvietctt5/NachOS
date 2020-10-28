@@ -158,7 +158,7 @@ ExceptionHandler(ExceptionType which)
 			switch(type)
 			{
 				case SC_Halt:
-					printf("Shutdown, initiated by user program.\n");
+					printf("\nShutdown, initiated by user program.\n");
 					interrupt->Halt();
 					return;
 					
@@ -260,6 +260,7 @@ ExceptionHandler(ExceptionType which)
 					// void Close(OpenFileId id);
 					// Input: id file can dong
 					// Output: tra ve 0 neu dong thanh cong, -1 neu xay ra loi
+					
 					int indexClose = machine->ReadRegister(4);
 					int indexCrr = fileSystem->index;
 					
