@@ -35,7 +35,7 @@ CPP = gcc -E
 INCDIR =-I../userprog -I../threads
 CFLAGS = -G 0 -c $(INCDIR)
 
-all: halt shell matmult sort echo cat copy
+all: halt shell matmult sort copy
 
 start.o: start.s ../userprog/syscall.h
 	$(CPP) $(CPPFLAGS) start.c > strt.s
@@ -66,6 +66,18 @@ matmult: matmult.o start.o
 	$(LD) $(LDFLAGS) start.o matmult.o -o matmult.coff
 	../bin/coff2noff matmult.coff matmult
 	
+createFile.o: createFile.c
+	$(CC) $(CFLAGS) -c createFile.c
+createFile: createFile.o start.o
+	$(LD) $(LDFLAGS) start.o createFile.o -o createFile.coff
+	../bin/coff2noff createFile.coff createFile
+	
+openFile.o: openFile.c
+	$(CC) $(CFLAGS) -c openFile.c
+openFile: openFile.o start.o
+	$(LD) $(LDFLAGS) start.o openFile.o -o openFile.coff
+	../bin/coff2noff openFile.coff openFile
+	
 echo.o: echo.c
 	$(CC) $(CFLAGS) -c echo.c
 echo: echo.o start.o
@@ -83,3 +95,9 @@ copy.o: copy.c
 copy: copy.o start.o
 	$(LD) $(LDFLAGS) start.o copy.o -o copy.coff
 	../bin/coff2noff copy.coff copy
+	
+closeFile.o: closeFile.c
+	$(CC) $(CFLAGS) -c closeFile.c
+closeFile: closeFile.o start.o
+	$(LD) $(LDFLAGS) start.o closeFile.o -o closeFile.coff
+	../bin/coff2noff closeFile.coff closeFile

@@ -2,6 +2,6 @@
 
 int main()
 {
-	Open("test.txt", 1);
+	Open("file.txt", 1);
 	return;
 }

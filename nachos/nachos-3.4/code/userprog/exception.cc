@@ -176,7 +176,7 @@ ExceptionHandler(ExceptionType which)
 					
 					virtAddr = machine->ReadRegister(4);
 					printf("Reading file name...\n");
-					filename = User2System(virtAddr, MaxFileLength + 1);
+					filename = User2System(virtAddr, MaxFileLength);
 					if (filename == NULL)
 					{
 						printf("Not enough memory in system.\n");
@@ -187,7 +187,6 @@ ExceptionHandler(ExceptionType which)
 					}
 					
 					printf("Finish reading filename.\n");
-					printf("File name.\n");
 					
 					if (!fileSystem->Create(filename, 0))
 					{
@@ -199,6 +198,7 @@ ExceptionHandler(ExceptionType which)
 					}
 					
 					machine->WriteRegister(2,0);
+					printf("Creating file successful !");
 					delete[] filename;
 					IncreasePC();
 					return;
@@ -221,7 +221,7 @@ ExceptionHandler(ExceptionType which)
 						return;
 					}
 					
-					name = User2System(nameAddr, MaxFileLength + 1);
+					name = User2System(nameAddr, MaxFileLength);
 					
 					// mo file stdin va stdout thi khong can tang bien index
 					if (strcmp(name,"stdin") == 0)
@@ -264,7 +264,7 @@ ExceptionHandler(ExceptionType which)
 					int indexClose = machine->ReadRegister(4);
 					int indexCrr = fileSystem->index;
 					
-					if (indexClose > indexCrr)
+					if (indexClose >= indexCrr)
 					{
 						printf("\nClose failed.\n");
 						machine->WriteRegister(2,-1);
