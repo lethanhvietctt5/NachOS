@@ -541,7 +541,6 @@ ExceptionHandler(ExceptionType which)
 				{       
 					// int Join(SpaceId id)
 					// Input: id dia chi cua thread
-					// Output: 
 					int id = machine->ReadRegister(4);
 			
 					int res = pTab->JoinUpdate(id);
