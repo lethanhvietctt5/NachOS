@@ -1,13 +1,6 @@
 // pcb.cc, "Process Control Block"
 // All rights reserved.
 
-/////////////////////////////////////////////////
-// 	DH KHTN - DHQG TPHCM			/
-// 	1512034 Nguyen Dang Binh		/
-// 	1512042 Nguyen Thanh Chung		/
-// 	1512123 Hoang Ngoc Duc			/
-/////////////////////////////////////////////////
-
 #include "pcb.h"
 #include "utility.h"
 #include "system.h"
