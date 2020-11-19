@@ -50,6 +50,7 @@
 //	are in machine.h.
 //----------------------------------------------------------------------
 
+extern void StartProcess_2(int id);
 
 char* User2System(int virtAddr, int length)
 {
@@ -102,6 +103,8 @@ void IncreasePC()
     	machine->WriteRegister(PCReg, counter);
    	machine->WriteRegister(NextPCReg, counter + 4);
 }
+
+int currentProcess = 0;
 
 void
 ExceptionHandler(ExceptionType which)
@@ -495,6 +498,31 @@ ExceptionHandler(ExceptionType which)
 						i++;
 					}
 					delete[] buffer;
+					IncreasePC();
+					return;
+				}
+				
+				case SC_Exec:
+				{
+					int virtAddr = machine->ReadRegister(4);
+					char* name = User2System(virtAddr, MaxFileLength);
+					if (name == NULL) {
+						printf("\nNot enough memory.\n");
+						machine->WriteRegister(2,-1);
+						return;
+					}
+					currentProcess++;
+					Thread* newThr = new Thread(name);
+					if (newThr == NULL) {
+						printf("\nNot enough memory.\n");
+						machine->WriteRegister(2,-1);
+						return;
+					}
+					arrProcessName[currentProcess - 1] = name;
+					printf("Name: %s\n", arrProcessName[currentProcess -1]);
+					newThr->processID = currentProcess;
+					currentThread->Yield();
+					newThr->Fork(StartProcess_2, newThr->processID);
 					IncreasePC();
 					return;
 				}

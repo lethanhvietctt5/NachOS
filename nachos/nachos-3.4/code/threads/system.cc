@@ -30,6 +30,8 @@ SynchDisk   *synchDisk;
 #ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
 Machine *machine;	// user program memory and registers
 SynchConsole* gSynchConsole;
+BitMap *gPhysPageBitMap;
+char** arrProcessName;
 #endif
 
 #ifdef NETWORK
@@ -151,6 +153,11 @@ Initialize(int argc, char **argv)
 #ifdef USER_PROGRAM
     machine = new Machine(debugUserProg);	// this must come first
     gSynchConsole = new SynchConsole();
+    gPhysPageBitMap = new BitMap(256);
+    arrProcessName = new char*[10];
+    for (int i = 0; i < 10; ++i) {
+    	arrProcessName[i] = NULL;
+    }
 #endif
 
 #ifdef FILESYS

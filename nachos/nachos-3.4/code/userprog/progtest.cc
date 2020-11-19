@@ -20,6 +20,29 @@
 //	memory, and jump to it.
 //----------------------------------------------------------------------
 
+void StartProcess_2(int id)
+{
+    char* fileName = arrProcessName[id - 1];
+
+    AddrSpace *space;
+    space = new AddrSpace(fileName);
+
+	if(space == NULL)
+	{
+		printf("\nPCB::Exec : Can't create AddSpace.");
+		return;
+	}
+
+    currentThread->space = space;
+
+    space->InitRegisters();		
+    space->RestoreState();		
+
+    machine->Run();		
+    ASSERT(FALSE);		
+}
+
+
 void
 StartProcess(char *filename)
 {
