@@ -22,7 +22,7 @@
 
 void StartProcess_2(int id)
 {
-    char* fileName = arrProcessName[id - 1];
+    char* fileName = arrProcessName[id];
 
     AddrSpace *space;
     space = new AddrSpace(fileName);

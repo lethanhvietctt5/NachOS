@@ -101,6 +101,11 @@ class Thread {
     void setStatus(ThreadStatus st) { status = st; }
     char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
+    void FreeSpace() {
+      if (space != 0) {
+        delete space;
+      }
+    }
 
   private:
     // some of the private data for this class is listed above

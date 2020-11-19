@@ -104,7 +104,7 @@ void IncreasePC()
    	machine->WriteRegister(NextPCReg, counter + 4);
 }
 
-int currentProcess = 0;
+int currentProcess = 1;
 
 void
 ExceptionHandler(ExceptionType which)
@@ -511,21 +511,35 @@ ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2,-1);
 						return;
 					}
-					currentProcess++;
 					Thread* newThr = new Thread(name);
 					if (newThr == NULL) {
 						printf("\nNot enough memory.\n");
 						machine->WriteRegister(2,-1);
 						return;
 					}
-					arrProcessName[currentProcess - 1] = name;
-					printf("Name: %s\n", arrProcessName[currentProcess -1]);
+					arrProcessName[currentProcess] = name;
+					printf("Name: %s\n", arrProcessName[currentProcess]);
 					newThr->processID = currentProcess;
-					currentThread->Yield();
+					//currentThread->Yield();
 					newThr->Fork(StartProcess_2, newThr->processID);
+					currentProcess++;
 					IncreasePC();
 					return;
 				}
+
+				case SC_Exit:
+				{
+					currentThread->FreeSpace();
+					currentThread->Finish();
+
+					for(int i = 0; i < currentThread->space->getNumPages(); i++) {
+						gPhysPageBitMap->Clear(currentThread->space->getPageTable()[i].physicalPage);
+					}
+
+					IncreasePC();
+					return;
+				}
+
 				default:
 					break;
 			}
