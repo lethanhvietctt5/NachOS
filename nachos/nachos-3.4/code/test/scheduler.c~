@@ -1,9 +1,0 @@
-#include "syscall.h"
-
-void main() {
-    int pongID;
-    char temp[10];
-
-    pongID = Exec(./test/pong);
-    ReadString(temp, 10);
-}
