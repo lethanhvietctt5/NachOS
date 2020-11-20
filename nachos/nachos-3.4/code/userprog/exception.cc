@@ -528,21 +528,24 @@ ExceptionHandler(ExceptionType which)
 						}
 					}
 					
-					//currentThread->Yield()
 					IncreasePC();
 					return;
 				}
 
 				case SC_Exit:
 				{
-					currentThread->FreeSpace();
-					currentThread->Finish();
-
+					// xoa danh dau trong gPhysPageBitmap
 					for(int i = 0; i < currentThread->space->getNumPages(); i++) {
 						gPhysPageBitMap->Clear(currentThread->space->getPageTable()[i].physicalPage);
 					}
+					
+					// xoa ten thread luu trong arrProcessName
+					arrProcessName[currentThread->processID] = NULL;
 
 					IncreasePC();
+
+					currentThread->FreeSpace();
+					currentThread->Finish();
 					return;
 				}
 
