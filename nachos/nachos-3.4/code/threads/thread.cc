@@ -146,6 +146,7 @@ Thread::Finish ()
 {
     (void) interrupt->SetLevel(IntOff);		
     ASSERT(this == currentThread);
+    //arrProcessName[processID] = NULL;
     
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
     

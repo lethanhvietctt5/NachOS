@@ -153,7 +153,7 @@ Initialize(int argc, char **argv)
 #ifdef USER_PROGRAM
     machine = new Machine(debugUserProg);	// this must come first
     gSynchConsole = new SynchConsole();
-    gPhysPageBitMap = new BitMap(256);
+    gPhysPageBitMap = new BitMap(128);
     arrProcessName = new char*[10];
     for (int i = 0; i < 10; ++i) {
     	arrProcessName[i] = NULL;

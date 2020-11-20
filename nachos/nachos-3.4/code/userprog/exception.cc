@@ -517,12 +517,18 @@ ExceptionHandler(ExceptionType which)
 						machine->WriteRegister(2,-1);
 						return;
 					}
-					arrProcessName[currentProcess] = name;
-					printf("Name: %s\n", arrProcessName[currentProcess]);
-					newThr->processID = currentProcess;
-					//currentThread->Yield();
-					newThr->Fork(StartProcess_2, newThr->processID);
-					currentProcess++;
+					
+					for(int i = 0; i < 10; ++i) {
+						if (arrProcessName[i] == NULL) {
+							arrProcessName[i] = name;
+							printf("Process: %s, ID: %d\n", arrProcessName[i], i);
+							newThr->processID = i;
+							newThr->Fork(StartProcess_2, newThr->processID);
+							break;
+						}
+					}
+					
+					//currentThread->Yield()
 					IncreasePC();
 					return;
 				}
