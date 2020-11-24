@@ -504,6 +504,9 @@ ExceptionHandler(ExceptionType which)
 				
 				case SC_Exec:
 				{
+					// SpaceId Exec(char *name);
+					// Input: ten file cua chuong trinh can thuc thi, cung la ten cua tien trinh
+					// Output: ID cua tien trinh
 					int virtAddr = machine->ReadRegister(4);
 					char* name = User2System(virtAddr, MaxFileLength);
 					if (name == NULL) {
@@ -521,7 +524,6 @@ ExceptionHandler(ExceptionType which)
 					for(int i = 0; i < 10; ++i) {
 						if (arrProcessName[i] == NULL) {
 							arrProcessName[i] = name;
-							printf("Process: %s, ID: %d\n", arrProcessName[i], i);
 							newThr->processID = i;
 							newThr->Fork(StartProcess_2, newThr->processID);
 							break;
